@@ -1,26 +1,32 @@
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 
 app = FastAPI()
 
-items = ["item1","apple","banana","orange","grape","kiwi","mango","peach","pear","plum"]
+class Item(BaseModel): 
+    text: str = None, 
+    is_done: bool # If the default value is not present, then its compulsory to pass in
+
+items = []
 
 @app.get("/")
 def root():
     return {"message":"Welcome to the todo list API!"}
 
 
-@app.get("/items")
+@app.get("/items", response_model=list[Item])
 def get_limit_items(limit:int=10):
     return items[:limit]
 
 @app.post("/items")
-def create_item(item:str):
+def create_item(item:Item):
     items.append(item)
     return items
 
 
 @app.delete("/items/delete")
-def delete_item(item:str):
+def delete_item(item:Item):
     if item in items:
         items.remove(item)
         return f"Item {item} deleted successfully, updated items: {items}"
